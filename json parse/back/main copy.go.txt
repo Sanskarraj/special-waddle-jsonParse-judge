@@ -1,0 +1,82 @@
+package main
+
+import (
+	"encoding/json"
+	"fmt"
+	"strings"
+)
+
+func main() {
+	// Example JSON string
+	jsonString := `{
+		"input": {
+			"lavda": [[]],
+			"chud": [],
+			"boobs": [[[]]],
+			"jhaat": [[]],
+			"lund": [],
+			"out": [[[]]],
+			"gote": [[[]]],
+			"tol": [[]],
+			"gaand": [],
+			"pudi": []
+		},
+		"output": {
+			"out": [[[]]]
+		}
+	}`
+
+
+
+	// Print the ordered keys
+	fmt.Println("Keys in 'input' (in original order):")
+	for i, key := range innerParameter(jsonString) {
+		fmt.Println(i)
+		fmt.Println(key)
+	}
+}
+
+
+func innerParameter (jsonString string) [] string{
+	// Create a decoder to capture the order of keys
+	decoder := json.NewDecoder(strings.NewReader(jsonString))
+
+	// Variables to capture JSON tokens
+	var (
+		token     json.Token
+		inInput   bool
+		keyOrder  []string
+		keyString string
+		err       error
+	)
+
+	// Process the tokens
+	for {
+		token, err = decoder.Token()
+		if err != nil {
+			break
+		}
+
+		switch t := token.(type) {
+		case string:
+			// Check if we've entered the "input" section
+			if t == "input" {
+				inInput = true
+			} else if inInput && keyString == "" {
+				// Record keys only when we're inside the "input" section
+				keyOrder = append(keyOrder, t)
+			}
+		case json.Delim:
+			// If we've reached the end of the "input" section, stop capturing
+			if t.String() == "}" && inInput {
+				inInput = false
+			}
+		}
+	}
+	return keyOrder
+
+}
+
+
+
+
